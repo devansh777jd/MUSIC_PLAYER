@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>YouTube Music Player — Premium UI</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <style>
+        /* Base */
+        :root{
+            --bg1:#000;
+            --bg2:#111;
+            --card:#181818;
+            --muted:#bdbdbd;
+            --accent:#1db954;
+            --glass: rgba(255,255,255,0.03);
+        }
+        *{box-sizing:border-box}
+        body{
+            margin:0;
+            font-family: "Poppins", system-ui;
+            background: linear-gradient(160deg,var(--bg1),var(--bg2) 40%, #141414);
+            color:#fff;
+            -webkit-font-smoothing:antialiased;
+            display:flex;
+            justify-content:center;
+            padding:18px;
+            min-height:100vh;
+            align-items:flex-start;
+        }
+
+        .app {
+            width:100%;
+            max-width:1100px;
+            display:grid;
+            grid-template-columns: 360px 1fr;
+            gap:22px;
+        }
+
+        /* CARD */
+        .card {
+            background:var(--card);
+            border-radius:14px;
+            padding:18px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+        }
+
+        /* NOW PLAYING */
+        .nowplaying {
+            display:flex;
+            gap:14px;
+            align-items:center;
+        }
+        .art {
+            width:120px;height:120px;
+            overflow:hidden;
+            border-radius:8px;
+            flex-shrink:0;
+        }
+        .art img{width:100%;height:100%;object-fit:cover}
+
+        .track-meta{display:flex;flex-direction:column;gap:6px}
+        .title{font-size:1.05rem;font-weight:700}
+        .subtitle{color:var(--muted);font-size:0.9rem}
+
+        /* Progress */
+        .progress-wrap{margin-top:14px}
+        .progress{
+            width:100%;height:8px;border-radius:8px;
+            background:rgba(255,255,255,0.05);
+            cursor:pointer;
+        }
+        .bar{
+            height:100%;width:0%;
+            background:linear-gradient(90deg,var(--accent),#65e88c);
+            border-radius:8px;
+        }
+        .time-row{
+            display:flex;justify-content:space-between;
+            margin-top:8px;font-size:0.85rem;color:var(--muted);
+        }
+
+        /* Controls */
+        .controls{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+            margin-top:12px;
+            flex-wrap:wrap;
+        }
+
+        .btn{
+            background:var(--accent);
+            color:#fff;
+            border:none;
+            padding:10px 12px;
+            border-radius:10px;
+            font-weight:700;
+            cursor:pointer;
+            min-width:64px;
+            display:flex;
+            justify-content:center;
+        }
+
+        .btn.secondary{
+            background:transparent;
+            border:1px solid rgba(255,255,255,0.05);
+            color:var(--muted);
+        }
+        .btn.big{
+            flex:2;
+            min-width:120px;
+            padding:12px;
+            border-radius:14px;
+            font-size:1rem;
+        }
+
+        /* Volume */
+        .volume-row{
+            margin-top:12px;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+        input[type=range]{
+            width:100%;
+            appearance:none;
+            height:6px;border-radius:6px;
+            background:rgba(255,255,255,0.06);
+        }
+        input[type=range]::-webkit-slider-thumb{
+            appearance:none;
+            width:16px;height:16px;border-radius:50%;
+            background:var(--accent);
+        }
+
+        /* Right column queue */
+        .queue{max-height:560px;overflow:auto;padding-right:6px}
+
+        .queue-item{
+            display:flex;gap:12px;
+            padding:12px;
+            border-radius:8px;
+            cursor:pointer;
+            transition:background .1s;
+        }
+        .queue-item:hover{background:rgba(255,255,255,0.03)}
+        .queue-item.active{
+            background:rgba(29,185,84,0.12);
+            border-left:3px solid var(--accent);
+        }
+        .q-art{width:56px;height:56px;overflow:hidden;border-radius:6px}
+        .q-art img{width:100%;height:100%;object-fit:cover}
+        .q-meta{display:flex;flex-direction:column}
+
+        /* RESPONSIVE FIX */
+        @media (max-width:900px){
+            .app{
+                grid-template-columns:1fr;
+                max-width:680px;
+                gap:18px;
+            }
+        }
+
+        @media (max-width:550px){
+
+            body{padding:10px}
+
+            .card{padding:14px}
+
+            .nowplaying{
+                flex-direction:row;
+                gap:10px;
+            }
+
+            .art{
+                width:80px;height:80px;
+            }
+
+            .controls{
+                flex-wrap:wrap;
+                gap:8px;
+            }
+
+            .btn{
+                flex:1;
+                min-width:60px;
+                font-size:0.9rem;
+                padding:10px;
+            }
+
+            .btn.big{
+                flex:2;
+                min-width:140px;
+                padding:12px;
+            }
+
+            .volume-row{
+                flex-wrap:wrap;
+            }
+
+            .q-art{
+                width:44px;height:44px;
+            }
+            .queue-item{
+                padding:10px;
+                gap:10px;
+            }
+        }
+
+        @media (max-width:380px){
+            .btn{min-width:52px;padding:8px}
+            .btn.big{min-width:110px}
+            .art{width:70px;height:70px}
+        }
+
+        /* Scrollbar */
+        .queue::-webkit-scrollbar{width:8px}
+        .queue::-webkit-scrollbar-thumb{
+            background:rgba(255,255,255,0.05);
+            border-radius:8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+
+    <!-- LEFT -->
+    <div class="left">
+
+        <div class="card">
+            <div class="nowplaying">
+                <div class="art"><img id="albumArt" src=""></div>
+                <div class="track-meta">
+                    <div class="title" id="nowTitle">—</div>
+                    <div class="subtitle" id="nowSubtitle">YouTube</div>
+                    <div class="subtitle" id="categoryLabel">Category: All</div>
+                </div>
+            </div>
+
+            <div class="progress-wrap">
+                <div class="progress" id="progressBar">
+                    <div class="bar" id="progressBarFill"></div>
+                </div>
+                <div class="time-row">
+                    <span id="currentTime">0:00</span>
+                    <span id="durationTime">0:00</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn secondary" id="shuffleBtn">🔀</button>
+                <button class="btn" id="prevBtn">⏮</button>
+                <button class="btn big" id="playBtn">▶️ Play</button>
+                <button class="btn" id="pauseBtn">⏸</button>
+                <button class="btn" id="nextBtn">⏭</button>
+            </div>
+
+            <div class="volume-row">
+                <span style="color:var(--muted)">Vol</span>
+                <input id="volumeSlider" type="range" min="0" max="100" value="50">
+                <span id="volVal" style="color:var(--muted)">50%</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="color:var(--accent);font-weight:700">Queue</div>
+                <div style="display:flex;gap:8px">
+                    <select id="categorySelect"></select>
+                    <button id="shuffleToggle" class="btn secondary">Shuffle: Off</button>
+                </div>
+            </div>
+            <div id="queue" class="queue"></div>
+        </div>
+    </div>
+
+</div>
+
+<div id="player-container" style="display:none"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
